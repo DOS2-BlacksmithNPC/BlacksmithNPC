@@ -1,0 +1,11 @@
+new equipment "DELLSMITH_Rosie_Set1"
+add equipmentgroup
+add equipment entry "ARM_Heavy_UpperBody"
+add equipmentgroup
+add equipment entry "ARM_Heavy_LowerBody"
+add equipmentgroup
+add equipment entry "ARM_Heavy_Boots"
+add equipmentgroup
+add equipment entry "ARM_Heavy_Gloves"
+add equipmentgroup
+add equipment entry "WPN_Mace_1H"

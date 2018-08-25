@@ -1,0 +1,22 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+
+KBSECTION
+IF
+GameModeStarted(_, 1)
+AND
+NOT DB_Origins(_)
+THEN
+DB_Origins((CHARACTERGUID)CHARACTERGUID_S_DELLSMITH_Humans_Hero_Female_Rosie_933eaacd-0239-40fb-9776-824c5ca13ef4);
+
+IF
+RegionStarted(_Region)
+AND
+StringContains(_Region, "TestLevel_DELLSMITH_", 1)
+THEN
+GoalCompleted;
+EXITSECTION
+
+ENDEXITSECTION
+ParentTargetEdge "DeadlyEssenceLaughingLeader_BlacksmithNPC"

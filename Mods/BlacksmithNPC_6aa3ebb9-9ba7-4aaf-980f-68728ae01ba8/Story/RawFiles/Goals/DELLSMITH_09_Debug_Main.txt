@@ -1,0 +1,86 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+DB_Dialogs(ITEMGUID_DELLSMITH_TestLevel_Button_EquipmentMelter_48b3d2e9-9436-410d-90db-9f0a042607b2, "DELLSMITH_EquipmentMelter_Button");
+
+//DB_DELLSMITH_EquipmentMelters(_Chest, Button)
+DB_DELLSMITH_EquipmentMelters((ITEMGUID)ITEMGUID_CONT_DELLSMITH_TestLevel_EquipmentMelter_bd14490a-701c-4a6f-aa78-33c8212db2c7, (ITEMGUID)ITEMGUID_DELLSMITH_TestLevel_Button_EquipmentMelter_48b3d2e9-9436-410d-90db-9f0a042607b2);
+KBSECTION
+//REGION MELTER_TEST
+IF
+ObjectFlagSet("DELLSMITH_MelterButtonPressed", (CHARACTERGUID)_Character, _Instance)
+AND
+DialogGetInvolvedNPC(_Instance, 1, (ITEMGUID)_Button)
+THEN
+ObjectClearFlag(_Character, "DELLSMITH_MelterButtonPressed");
+PlayEffect(_Button, "RS3_FX_GP_Combat_CameraShake_B", "");
+PlayAnimation(_Button, "On", "DELLSMITH_MelterButtonPlayOff");
+PlaySound(_Button, "Items_Puzzles_PUZ_Button_A_TEMP_Use");
+DebugBreak("[DELLSMITH:Debug:MelterButtonDialog] Starting equipment melting process.");
+CharacterItemSetEvent(_Character, _Button, "DELLSMITH_StartMeltingEquipment");
+
+IF
+StoryEvent(_Button, "DELLSMITH_MelterButtonPlayOff")
+THEN
+PlayAnimation(_Button, "Off", "");
+
+IF
+CharacterItemEvent(_Character, _Button, "DELLSMITH_StartMeltingEquipment")
+AND
+DB_DELLSMITH_EquipmentMelters(_Chest, _Button)
+AND
+GetUUID(_Chest, _UUID)
+AND
+StringConcatenate("DELLSMITH_MeltEquipment_", _UUID, _IterateEvent)
+THEN
+DB_DELLSMITH_EquipmentMelter_Temp_MelterTarget(_Chest, _Character, _IterateEvent);
+ProcObjectTimer(_Chest, "DELLSMITH_Timers_MeltingComplete", 500);
+InventoryLaunchIterator(_Chest, _IterateEvent, "");
+PlayEffect(_Chest, "RS3_FX_Skills_Voodoo_StripResistances_Impact_01", "");
+
+IF
+StoryEvent((ITEMGUID)_Item, _IterateEvent)
+AND
+DB_DELLSMITH_EquipmentMelter_Temp_MelterTarget(_Chest, _Character, _IterateEvent)
+AND
+ItemIsStoryItem(_Item, 0)
+AND
+ItemIsEquipable(_Item, 1)
+THEN
+DELLSMITH_Debug_AddMelterResult("LOOT_Essence_Shadow_A_18ec74cd-5948-4ef3-bdcf-5d9fb49e3e58", 1);
+ItemRemove(_Item);
+
+PROC
+DELLSMITH_Debug_AddMelterResult((STRING)_Template, (INTEGER)_Amount)
+AND
+SysCount("DB_DELLSMITH_EquipmentMelter_Temp_Results", 3, _Index)
+THEN
+DB_DELLSMITH_EquipmentMelter_Temp_Results(_Index, _Template, _Amount);
+
+PROC
+ProcObjectTimerFinished((ITEMGUID)_Chest, "DELLSMITH_Timers_MeltingComplete")
+AND
+DB_DELLSMITH_EquipmentMelter_Temp_MelterTarget(_Chest, _Character, _IterateEvent)
+AND
+DB_DELLSMITH_EquipmentMelter_Temp_Results(_Index, _Template, _Amount)
+THEN
+ItemTemplateAddTo(_Template, _Character, _Amount, 1);
+NOT DB_DELLSMITH_EquipmentMelter_Temp_Results(_Index, _Template, _Amount);
+
+PROC
+ProcObjectTimerFinished((ITEMGUID)_Chest, "DELLSMITH_Timers_MeltingComplete")
+AND
+DB_DELLSMITH_EquipmentMelter_Temp_MelterTarget(_Chest, _Character, _IterateEvent)
+THEN
+NOT DB_DELLSMITH_EquipmentMelter_Temp_MelterTarget(_Chest, _Character, _IterateEvent);
+DisplayText(_Chest, "<font color='#EE82EE'>Melting Complete!</font>");
+//END_REGION
+
+IF
+CharacterUsedItem(_Character, ITEMGUID_CONT_Humans_Citz_Chest_Rich_A_000_5a7d81f3-4abd-4967-adff-5387ee7ee755)
+THEN
+GenerateTreasure(ITEMGUID_CONT_Humans_Citz_Chest_Rich_A_000_5a7d81f3-4abd-4967-adff-5387ee7ee755, "TEST_Generation", -1, _Character);
+EXITSECTION
+
+ENDEXITSECTION
+ParentTargetEdge "DELLSMITH_09_Debug"

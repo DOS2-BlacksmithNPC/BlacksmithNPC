@@ -1,0 +1,37 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+DELLSMITH_Internal_CompleteIfStarted();
+KBSECTION
+PROC
+DELLSMITH_Internal_Start()
+THEN
+DebugBreak("[BlacksmithNPC:ParentGoal:StoryStarted] Starting BlacksmithNPC.");
+GoalCompleted;
+
+IF
+GameEventSet("GAMEEVENT_GameStarted")
+THEN
+DELLSMITH_Internal_Start();
+
+// For saves where this goal is active, but wasn't completed
+IF
+SavegameLoaded(_,_,_,_)
+AND
+DB_StoryStarted(_)
+THEN
+DebugBreak("[BlacksmithNPC:ParentGoal:SavegameLoaded] BlacksmithNPC wasn't started on an existing save. Starting...");
+DELLSMITH_Internal_Start();
+
+//Used to complete this goal if the game was already started (on existing saves).
+//This proc will run as soon as the goal hits the INIT section, so it should trigger before SavegameLoaded.
+PROC
+DELLSMITH_Internal_CompleteIfStarted()
+AND
+DB_StoryStarted((INTEGER)_)
+THEN
+DebugBreak("[BlacksmithNPC:ParentGoal:CompleteIfStarted] BlacksmithNPC was added to an existing save. Starting...");
+DELLSMITH_Internal_Start();
+EXITSECTION
+
+ENDEXITSECTION
